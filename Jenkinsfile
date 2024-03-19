@@ -3,10 +3,8 @@ pipeline {
     stages {
         stage('Build and Push Docker Image') {
             steps {
-                if (env.BRANCH_NAME == 'dev') {
-                    sh 'chmod +x build.sh'
-                    sh './build.sh'
-                }
+                sh 'chmod +x build.sh'
+                sh './build.sh'
             }
         }
         stage('Deploy to Docker Hub Dev') {
@@ -36,6 +34,6 @@ pipeline {
                     }
                 }
             }
-}
-   }
+        }
+    }
 }
