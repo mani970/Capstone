@@ -15,6 +15,7 @@ pipeline {
                 expression { return env.BRANCH_NAME == 'dev' }
             }
             steps {
+                sh 'docker build -t mani970/dev/webpage:v1 .'
                 sh './deploy.sh dev'
             }
         }
@@ -23,6 +24,7 @@ pipeline {
                 expression { return env.BRANCH_NAME == 'master' }
             }
             steps {
+                sh 'docker build -t mani970/prod/webpage:v1 .'
                 sh './deploy.sh prod'
             }
         }
