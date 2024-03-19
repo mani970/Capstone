@@ -31,7 +31,8 @@ pipeline {
                     }
                 }
             }
-        }stage('Deploy to Docker Hub Prod') {
+        }
+        stage('Deploy to Docker Hub Prod') {
             steps {
                 script {
                     if (env.BRANCH_NAME == 'master' && currentBuild.result == 'SUCCESS' && currentBuild.changeSets.any { it.items.any { it.editType == 'ADD' && it.path =='dev' } }) {
