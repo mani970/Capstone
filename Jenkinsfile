@@ -2,7 +2,8 @@ pipeline {
     agent any
     environment {
         REGISTRY = "docker.io"
-        IMAGE_NAME = "mani970/webpage"
+        IMAGE_NAME = "mani970/dev/webpage"
+        IMAGE_NAME_PROD = "mani970/prod/webpage"
     }
     stages {
         stage('Build and push Docker image to dev repo') {
@@ -26,10 +27,11 @@ pipeline {
                 sh './build.sh'
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                     sh "docker login -u $USERNAME -p $PASSWORD $REGISTRY"
-                    sh "docker push $IMAGE_NAME:v1"
+                    sh "docker push $IMAGE_NAME_PROD:v1"
                 }
                 sh './deploy.sh'
             }
         }
     }
 }
+
