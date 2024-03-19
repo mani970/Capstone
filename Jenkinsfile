@@ -3,9 +3,7 @@ pipeline {
     environment {
         REGISTRY = "docker.io"
         IMAGE_NAME = "webpage:v1"
-        DOCKER_USERNAME = "${secrets.DOKERTOKEN}"
-        DOCKER_PASSWORD = credentials('mani970')
-        DOCKER_REGISTRY = "${REGISTRY}/${DOCKER_USERNAME}/${env.BRANCH_NAME}"
+        DOCKER_REGISTRY = "${REGISTRY}/${env.DOCKER_USERNAME}/${env.BRANCH_NAME}"
     }
     stages {
         stage('Build and Push Docker Image') {
@@ -13,8 +11,10 @@ pipeline {
                 script {
                     sh 'chmod +x build.sh'
                     sh './build.sh'
-                    sh "docker build -t ${DOCKER_REGISTRY} ."
-                    sh "docker push ${DOCKER_REGISTRY}"
+                    withCredentials([usernamePassword(credentialsId: 'mani970', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh "docker build -t ${DOCKER_REGISTRY} ."
+                        sh "docker push ${DOCKER_REGISTRY}"
+                    }
                 }
             }
         }
@@ -29,7 +29,7 @@ pipeline {
                         sh 'echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin'
                         sh './deploy.sh'
                     }
-              }
+                }
             }
         }
         stage('Deploy to Docker Hub Prod') {
