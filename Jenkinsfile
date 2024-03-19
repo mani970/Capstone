@@ -15,7 +15,7 @@ pipeline {
             steps {
                 sh './build.sh'
                 sh "docker build -t $IMAGE_NAME:v1 ."
-                sh "docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD $REGISTRY"
+                sh "docker login -u '${DOCKERHUB_USERNAME}' -p '${DOCKERHUB_PASSWORD}' $REGISTRY"
                 sh "docker push $IMAGE_NAME:v1"
             }
         }
@@ -27,7 +27,7 @@ pipeline {
             steps {
                 sh './build.sh'
                 sh "docker build -t $IMAGE_NAME_PROD:v1 ."
-                sh "docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD $REGISTRY"
+                sh "docker login -u '${DOCKERHUB_USERNAME}' -p '${DOCKERHUB_PASSWORD}' $REGISTRY"
                 sh "docker push $IMAGE_NAME_PROD:v1"
                 sh './deploy.sh'
             }
