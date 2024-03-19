@@ -3,7 +3,9 @@ pipeline {
     stages {
         stage('Build and Push Docker Image') {
             when {
-                branch 'dev'
+                anyOf {
+                    branch 'dev'
+                }
             }
             steps {
                 sh 'chmod +x build.sh'
@@ -12,7 +14,9 @@ pipeline {
         }
         stage('Deploy to Docker Hub Dev') {
             when {
-                branch 'dev'
+                anyOf {
+                    branch 'dev'
+                }
             }
             steps {
                 sh 'chmod +x deploy.sh'
@@ -22,11 +26,15 @@ pipeline {
                 }
             }
         }
-        stage('Deploy to Docker Hub Prod') {
-            when {
-                branch 'master'
-            }
-            steps {
+ stage('Deploy to Docker Hub Prod') {
+    when {
+        branch 'master'
+    }
+    steps {
+        script {
+            // Check if the current branch is the result of merging the dev branch
+            if (currentBuild.rawBuild.changeSet.items.empty == false && currentBuild.rawBuild.changeSet.items[0].affectedFiles.any { it.editType == 'A' && it.path == 'dev' }) {
+                // If so, build and push the Docker image to the prod repo
                 sh 'chmod +x build.sh'
                 sh 'chmod +x deploy.sh'
                 withCredentials([usernamePassword(credentialsId: 'mani970', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
