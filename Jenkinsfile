@@ -3,7 +3,6 @@ pipeline {
     environment {
         REGISTRY = "docker.io"
         IMAGE_NAME = "webpage:v1"
-        DOCKER_REGISTRY = "${REGISTRY}/${env.DOCKER_USERNAME}/${env.BRANCH_NAME}"
     }
     stages {
         stage('Build and Push Docker Image') {
@@ -12,6 +11,7 @@ pipeline {
                     sh 'chmod +x build.sh'
                     sh './build.sh'
                     withCredentials([usernamePassword(credentialsId: 'mani970', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        env.DOCKER_REGISTRY = "${REGISTRY}/${DOCKER_USERNAME}/${env.BRANCH_NAME}"
                         sh "docker build -t ${DOCKER_REGISTRY} ."
                         sh "docker push ${DOCKER_REGISTRY}"
                     }
@@ -31,17 +31,17 @@ pipeline {
                     }
                 }
             }
-        }
-        stage('Deploy to Docker Hub Prod') {
+        }stage('Deploy to Docker Hub Prod') {
             steps {
                 script {
                     if (env.BRANCH_NAME == 'master' && currentBuild.result == 'SUCCESS' && currentBuild.changeSets.any { it.items.any { it.editType == 'ADD' && it.path =='dev' } }) {
                         sh 'chmod +x build.sh'
                         sh 'chmod +x deploy.sh'
                         withCredentials([usernamePassword(credentialsId: 'mani970', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                            env.DOCKER_REGISTRY = "${REGISTRY}/mani970/prod/${IMAGE_NAME}"
                             sh 'echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin'
-                            sh "docker build -t ${REGISTRY}/mani970/prod/${IMAGE_NAME} ."
-                            sh "docker push ${REGISTRY}/mani970/prod/${IMAGE_NAME}"
+                            sh "docker build -t ${DOCKER_REGISTRY} ."
+                            sh "docker push ${DOCKER_REGISTRY}"
                             sh './deploy.sh'
                         }
                     }

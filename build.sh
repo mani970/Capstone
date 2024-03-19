@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Build the Docker image
-docker build -t webpage:v1 .
+docker build -t ${DOCKER_REGISTRY} .
 
 # Push the Docker image to the Docker Hub dev repository
-docker push mani970/dev/webpage:v1
+docker push ${DOCKER_REGISTRY}
