@@ -8,7 +8,7 @@ pipeline {
         DOCKER_REGISTRY = "${REGISTRY}/${DOCKER_USERNAME}/${env.BRANCH_NAME}"
     }
     stages {
-        stage('Build and Push Docker Image") {
+        stage('Build and Push Docker Image') {
             steps {
                 script {
                     sh 'chmod +x build.sh'
@@ -29,7 +29,7 @@ pipeline {
                         sh 'echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin'
                         sh './deploy.sh'
                     }
-                }
+              }
             }
         }
         stage('Deploy to Docker Hub Prod') {
