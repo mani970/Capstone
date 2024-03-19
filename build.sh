@@ -1,6 +1,7 @@
 #!/bin/bash
 
-if [ "$1" == "build-and-run" ]; then
-    docker build -t webpage:v1 .
-    docker-compose up -d
-fi
+# Build the Docker image
+docker build -t webpage:v1 .
+
+# Push the Docker image to the Docker Hub dev repository
+docker push mani970/dev/webpage:v1
