@@ -4,6 +4,8 @@ pipeline {
         REGISTRY = "docker.io"
         IMAGE_NAME = "mani970/dev/webpage"
         IMAGE_NAME_PROD = "mani970/prod/webpage"
+        DOCKERHUB_USERNAME = credentials('dockerhub-creds').username
+        DOCKERHUB_PASSWORD = credentials('dockerhub-creds').password
     }
     stages {
         stage('Build and push Docker image to dev repo') {
@@ -12,10 +14,9 @@ pipeline {
             }
             steps {
                 sh './build.sh'
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    sh "docker login -u $USERNAME -p $PASSWORD $REGISTRY"
-                    sh "docker push $IMAGE_NAME:v1"
-                }
+                sh "docker build -t $IMAGE_NAME:v1 ."
+                sh "docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD $REGISTRY"
+                sh "docker push $IMAGE_NAME:v1"
             }
         }
         stage('Build and push Docker image to prod repo') {
@@ -25,13 +26,11 @@ pipeline {
             }
             steps {
                 sh './build.sh'
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    sh "docker login -u $USERNAME -p $PASSWORD $REGISTRY"
-                    sh "docker push $IMAGE_NAME_PROD:v1"
-                }
+                sh "docker build -t $IMAGE_NAME_PROD:v1 ."
+                sh "docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD $REGISTRY"
+                sh "docker push $IMAGE_NAME_PROD:v1"
                 sh './deploy.sh'
             }
         }
     }
 }
-
