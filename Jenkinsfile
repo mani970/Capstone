@@ -3,7 +3,11 @@ pipeline {
     stages {
         stage('Build and Run Docker Container') {
             steps {
-                sh './build.sh build-and-run'
+                script {
+                    if (env.BRANCH_NAME == 'dev') {
+                        sh './build.sh build-and-run'
+                    }
+                }
             }
         }
         stage('Deploy to Docker Hub Dev') {
@@ -11,7 +15,7 @@ pipeline {
                 expression { return env.BRANCH_NAME == 'dev' }
             }
             steps {
-                sh './build.sh deploy --repository dev'
+                sh './deploy.sh dev'
             }
         }
         stage('Deploy to Docker Hub Prod') {
@@ -19,7 +23,7 @@ pipeline {
                 expression { return env.BRANCH_NAME == 'master' }
             }
             steps {
-                sh './build.sh deploy --repository prod'
+                sh './deploy.sh prod'
             }
         }
     }
