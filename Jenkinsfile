@@ -4,8 +4,8 @@ pipeline {
         REGISTRY = "docker.io"
         IMAGE_NAME = "mani970/dev/webpage"
         IMAGE_NAME_PROD = "mani970/prod/webpage"
-        DOCKERHUB_USERNAME = credentials('dockerhub-creds').username
-        DOCKERHUB_PASSWORD = credentials('dockerhub-creds').password
+        DOCKERHUB_USERNAME = credentials('mani970').username
+        DOCKERHUB_PASSWORD = credentials('DOCKERTOKEN').password
     }
     stages {
         stage('Build and push Docker image to dev repo') {
