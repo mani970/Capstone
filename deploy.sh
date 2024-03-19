@@ -1,16 +1,13 @@
 #!/bin/bash
 
-# Login to Docker Hub using GitHub Actions secret
-echo "${{ secrets.DOCKERTOKEN }}" | docker login --username mani970 --password-stdin
+function deploy() {
+  # Login to Docker Hub using Docker token
+  docker login -u Docker -p ${{secrets.DOCKERTOKEN}}
 
-# Build the Docker image
-docker-compose build
+  # Tag Docker image
+  TAG=${v1}
+  docker tag webpage:v1 mani970/dev/webpage:${TAG}
 
-# Tag the Docker image
-docker tag mani970/webpage:v1 mani970/webpage:v1
-
-# Push the Docker image to Docker Hub
-docker push mani970/webpage:v1
-
-# Run the Docker container
-docker-compose up -d
+  # Push Docker image
+  docker push mani970/webpage:${TAG}
+}
