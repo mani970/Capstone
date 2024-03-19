@@ -3,6 +3,7 @@ pipeline {
     environment {
         REGISTRY = "docker.io"
         IMAGE_NAME = "webpage:v1"
+        DOCKER_REGISTRY = ""
     }
     stages {
         stage('Build and Push Docker Image') {
@@ -21,6 +22,7 @@ pipeline {
             }
             steps {
                 withCredentials([usernamePassword(credentialsId: 'mani970', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                    env.DOCKER_REGISTRY = "${REGISTRY}/${DOCKER_USERNAME}/dev"
                     sh 'echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin'
                     sh './deploy.sh'
                 }
@@ -29,7 +31,7 @@ pipeline {
         stage('Deploy to Docker Hub Prod') {
             steps {
                 script {
-                    if (env.BRANCH_NAME == 'master' && currentBuild.result == 'SUCCESS' && currentBuild.changeSets.any { it.items.any { it.editType == 'ADD' && it.path =='dev' } }) {
+                    if (env.BRANCH_NAME == 'master' && currentBuild.result == 'SUCCESS' && currentBuild.changeSets.any { it.items.any { it.editType == 'ADD' && it.path =='dev'} }) {
                         withCredentials([usernamePassword(credentialsId: 'mani970', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                             env.DOCKER_REGISTRY = "${REGISTRY}/mani970/prod/${IMAGE_NAME}"
                             sh 'echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin'
