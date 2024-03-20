@@ -1,48 +1,39 @@
 pipeline {
     agent any
     environment {
-        REGISTRY = "docker.io"
-        IMAGE_NAME = "webpage:v1"
-        DOCKER_REGISTRY = ""
-        DOCKER_USERNAME = "mani970"
-        DOCKER_PASSWORD = credentials('DOCKERHUB')
+        DOCKERHUB_USERNAME = 'mani970'
+        DOCKERHUB_TOKEN = credentials('DOCKERHUB')
+        GITHUB_SECRET = '${secrets.DOKERTOKEN}'
+        DOCKERHUB_DEV_REPO = 'mani970/dev'
+        DOCKERHUB_PROD_REPO = 'mani970/prod'
+        DOCKER_IMAGE_NAME = 'webpage:v1'
     }
     stages {
-        stage('Build and Push Docker Image') {
+        stage('Build') {
             steps {
-                sh 'chmod +x build.sh'
-                withCredentials([usernamePassword(credentialsId: 'DOCKERHUB', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                    env.DOCKER_REGISTRY = "${REGISTRY}/${DOCKER_USERNAME}/dev"
-                    sh "docker build -t ${DOCKER_REGISTRY} ."
-                    sh "docker push ${DOCKER_REGISTRY}"
-                }
+                sh 'docker build -t ${DOCKER_IMAGE_NAME} .'
             }
         }
-        stage('Deploy to Docker Hub Dev') {
+        stage('Push to dev') {
             when {
                 branch 'dev'
             }
             steps {
-                withCredentials([usernamePassword(credentialsId: 'DOCKERHUB', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                    env.DOCKER_REGISTRY = "${REGISTRY}/${DOCKER_USERNAME}/dev"
-                    sh 'echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin'
+                sh './build.sh'
+            }
+            post {
+                success {
                     sh './deploy.sh'
                 }
             }
         }
-        stage('Deploy to Docker Hub Prod') {
+        stage('Push to prod') {
+            when {
+                branch 'master'
+            }
             steps {
-                script {
-                    if (env.BRANCH_NAME == 'master' && currentBuild.result == 'SUCCESS' && currentBuild.changeSets.any { it.items.any { it.editType == 'ADD' && it.path =='dev'} }) {
-                        withCredentials([usernamePassword(credentialsId: 'DOCKERHUB', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                            env.DOCKER_REGISTRY = "${REGISTRY}/${DOCKER_USERNAME}/prod/${IMAGE_NAME}"
-                            sh 'echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin'
-                            sh "docker build -t ${DOCKER_REGISTRY} ."
-                            sh "docker push ${DOCKER_REGISTRY}"
-                            sh './deploy.sh'
-                        }
-                    }
-                }
+                sh 'docker tag ${DOCKER_IMAGE_NAME} ${DOCKERHUB_PROD_REPO}:latest'
+                sh 'docker push ${DOCKERHUB_PROD_REPO}:latest'
             }
         }
     }
