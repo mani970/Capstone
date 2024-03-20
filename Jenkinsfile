@@ -16,7 +16,9 @@ pipeline {
         }
         stage('Push to dev') {
             when {
-                branch 'dev'
+                expression {
+                    BRANCH_NAME == 'dev'
+                }
             }
             steps {
                 sh './build.sh'
@@ -29,7 +31,9 @@ pipeline {
         }
         stage('Push to prod') {
             when {
-                branch 'master'
+                expression {
+                    BRANCH_NAME == 'master'
+                }
             }
             steps {
                 sh 'docker tag ${DOCKER_IMAGE_NAME} ${DOCKERHUB_PROD_REPO}:latest'
