@@ -1,24 +1,28 @@
 pipeline {
     agent any
 
-    triggers {
-        githubPush()
+    environment {
+        DOCKERHUB = credentials('DOCKERHUB')
     }
 
     stages {
-        stage('Build') {
+        stage('Build and Push Docker Image') {
             steps {
-                sh 'build.sh'
+                sh './build.sh'
             }
         }
 
-        stage('Deploy') {
+        stage('Deploy to Docker Hub') {
             when {
-                branch 'master'
+                anyOf {
+                    branch 'dev'
+                    branch 'master'
+                }
             }
-
             steps {
-                sh 'deploy.sh'
+                script {
+                    sh './deploy.sh'
+                }
             }
         }
     }

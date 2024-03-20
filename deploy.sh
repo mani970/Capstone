@@ -1,8 +1,11 @@
 #!/bin/bash
 
-# Log in to Docker Hub
-echo "${DOCKERHUB_TOKEN}" | docker login -u "${DOCKERHUB_USERNAME}" --password-stdin
+# Login to Docker Hub
+echo "${DOCKERHUB}" | docker login --username mani970 --password-stdin
 
-# Push the Docker image to Docker Hub
-docker tag webpage:v1 mani970/prod:v1
-docker push mani970/prod:v1
+# Push Docker image to the appropriate repository based on branch
+if [ "$BRANCH_NAME" == "dev" ]; then
+    docker-compose push dev
+elif [ "$BRANCH_NAME" == "master" ]; then
+    docker-compose push prod
+fi
