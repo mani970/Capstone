@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Get the current branch name
+BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+
 # Login to Docker Hub
 echo "${DOCKERHUB}" | docker login --username mani970 --password-stdin
 
