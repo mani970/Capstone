@@ -1,8 +1,16 @@
 #!/bin/bash
+set -e
 
-# Log in to Docker Hub
-echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-
-# Push the Docker image to Docker Hub
-docker tag webpage:v1 "$DOCKERHUB_USERNAME"/"$DOCKERHUB_REPO_NAME":latest
-docker push "$DOCKERHUB_USERNAME"/"$DOCKERHUB_REPO_NAME":latest
+# Check if the branch is dev or master
+if [ "$BRANCH" == "dev" ]; then
+    # Push the Docker image to the dev repository
+    docker tag webpage:v1 mani970/dev:v1
+    docker push mani970/dev:v1
+elif [ "$BRANCH" == "master" ]; then
+    # Push the Docker image to the prod repository
+    docker tag webpage:v1 mani970/prod:v1
+    docker push mani970/prod:v1
+else
+    echo "Invalid branch: $BRANCH"
+    exit 1
+fi

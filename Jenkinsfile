@@ -2,31 +2,35 @@ pipeline {
     agent any
     environment {
         DOCKERHUB_USERNAME = 'DOCKERHUB'
-        DOCKERHUB_PASSWORD = credentials('DOCKERHUB_PASSWORD')
-        DOCKERHUB_REPO_NAME = 'mani970/dev'
+        DOCKERHUB_PASSWORD = credentials('DOCKERHUB')
     }
     stages {
         stage('Build') {
             steps {
                 sh 'chmod +x build.sh'
                 sh './build.sh'
-           }
+            }
         }
-    }
-}
-
-post {
-    success {
-script {
-            if(env.BRANCH_NAME == 'dev') {
-                env.DOCKERHUB_REPO_NAME = 'mani970/dev'
+        stage('Deploy') {
+            when {
+                anyOf {
+                    branch 'dev'
+                    branch 'master'
+                }
             }
-            else {
-                env.DOCKERHUB_REPO_NAME = 'mani970/prod'
+            steps {
+                sh 'chmod +x deploy.sh'
+                script {
+                    def branch = env.BRANCH_NAME
+                    if (branch == 'dev') {
+                        sh './deploy.sh dev'
+                    } else if (branch == 'master') {
+                        sh './deploy.sh prod'
+                    } else {
+                        error "Invalid branch: $branch"
+                    }
+                }
             }
-            sh "sed -i 's/DOCKERHUB_REPO_NAME/${env.DOCKERHUB_REPO_NAME}/g' deploy.sh"
-            sh 'chmod +x deploy.sh'
-            sh './deploy.sh'
         }
     }
 }
