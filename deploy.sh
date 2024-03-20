@@ -1,9 +1,9 @@
 #!/bin/bash
 
-echo "Logging in to Docker Hub"
-
-docker login --username $DOCKERHUB_USERNAME --password $DOCKERHUB_TOKEN
-
-echo "Deploying Docker image to Docker Hub"
-
-docker push mani970/dev:webpage:v1
+if [ "$1" == "dev" ]; then
+  echo "Pushing Docker image to dev repo in Docker Hub..."
+  docker-compose push
+elif [ "$1" == "prod" ]; then
+  echo "Pushing Docker image to prod repo in Docker Hub..."
+  docker-compose push
+fi

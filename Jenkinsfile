@@ -1,43 +1,31 @@
 pipeline {
     agent any
-    environment {
-        DOCKERHUB_USERNAME = 'mani970'
-        DOCKERHUB_TOKEN = credentials('DOCKERHUB')
-        GITHUB_SECRET = '${secrets.DOKERTOKEN}'
-        DOCKERHUB_DEV_REPO = 'mani970/dev'
-        DOCKERHUB_PROD_REPO = 'mani970/prod'
-        DOCKER_IMAGE_NAME = 'webpage:v1'
+    triggers {
+        githubPush()
     }
     stages {
         stage('Build') {
             steps {
-                sh 'docker build -t ${DOCKER_IMAGE_NAME} .'
+                echo 'Building..'
+                sh 'chmod +x build.sh && ./build.sh'
             }
         }
-        stage('Push to dev') {
+        stage('Push to DockerHub') {
             when {
-                expression {
-                    BRANCH_NAME == 'dev'
-                }
+                branch 'dev'
             }
             steps {
-                sh './build.sh'
-            }
-            post {
-                success {
-                    sh './deploy.sh'
-                }
+                echo 'Pushing to DockerHub (dev)..'
+                sh 'chmod +x deploy.sh && ./deploy.sh dev'
             }
         }
-        stage('Push to prod') {
+        stage('Promote to Production') {
             when {
-                expression {
-                    BRANCH_NAME == 'master'
-                }
+                branch 'master'
             }
             steps {
-                sh 'docker tag ${DOCKER_IMAGE_NAME} ${DOCKERHUB_PROD_REPO}:latest'
-                sh 'docker push ${DOCKERHUB_PROD_REPO}:latest'
+                echo 'Pushing to DockerHub (prod)..'
+                sh 'chmod +x deploy.sh && ./deploy.sh prod'
             }
         }
     }
