@@ -1,14 +1,8 @@
 #!/bin/bash
 
-# Get the current branch name
-BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+# Log in to Docker Hub
+echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
 
-# Login to Docker Hub
-echo "${DOCKERHUB}" | docker login --username mani970 --password-stdin
-
-# Push Docker image to the appropriate repository based on branch
-if [ "$BRANCH_NAME" == "dev" ]; then
-    docker-compose push dev
-elif [ "$BRANCH_NAME" == "master" ]; then
-    docker-compose push prod
-fi
+# Push the Docker image to Docker Hub
+docker tag webpage:v1 "$DOCKERHUB_USERNAME"/"$DOCKERHUB_REPO_NAME":latest
+docker push "$DOCKERHUB_USERNAME"/"$DOCKERHUB_REPO_NAME":latest

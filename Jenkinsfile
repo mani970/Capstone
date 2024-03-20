@@ -1,37 +1,32 @@
 pipeline {
     agent any
-
     environment {
-        DOCKERHUB = credentials('DOCKERHUB')
+        DOCKERHUB_USERNAME = 'DOCKERHUB'
+        DOCKERHUB_PASSWORD = credentials('DOCKERHUB_PASSWORD')
+        DOCKERHUB_REPO_NAME = 'mani970/dev'
     }
-
     stages {
-        stage('Build Docker Image') {
+        stage('Build') {
             steps {
+                sh 'chmod +x build.sh'
                 sh './build.sh'
-            }
+           }
         }
+    }
+}
 
-        stage('Deploy to Docker Hub') {
-            when {
-                anyOf {
-                    branch 'dev'
-                    branch 'master'
-                }
+post {
+    success {
+script {
+            if(env.BRANCH_NAME == 'dev') {
+                env.DOCKERHUB_REPO_NAME = 'mani970/dev'
             }
-            steps {
-                script {
-                    if (env.BRANCH_NAME == 'dev') {
-                        // Checkout the 'dev' branch
-                        git checkout dev
-                        sh './deploy.sh'
-                    } else if (env.BRANCH_NAME == 'master') {
-                        git checkout master
-                        sh 'git merge dev'
-                        sh './deploy.sh'
-                    }
-                }
+            else {
+                env.DOCKERHUB_REPO_NAME = 'mani970/prod'
             }
+            sh "sed -i 's/DOCKERHUB_REPO_NAME/${env.DOCKERHUB_REPO_NAME}/g' deploy.sh"
+            sh 'chmod +x deploy.sh'
+            sh './deploy.sh'
         }
     }
 }
