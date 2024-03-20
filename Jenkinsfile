@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         DOCKERHUB_USERNAME = 'DOCKERHUB'
-        DOCKERHUB_PASSWORD = credentials('DOCKERHUB')
+        DOCKERHUB_PASSWORD = credentials('DOCKERHUB_PASSWORD_PSW')
     }
     stages {
         stage('Build') {

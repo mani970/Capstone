@@ -1,16 +1,25 @@
 #!/bin/bash
-set -e
 
 # Build the Docker image
 docker build -t webpage:v1 .
 
 # Log in to Docker Hub
-echo "$DOCKERHUB" | docker login -u "$DOCKERHUB" --password-stdin
+echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
 
-# Push the Docker image to the dev repository
-docker tag webpage:v1 mani970/dev:v1
-docker push mani970/dev:v1
+# Push the Docker image to Docker Hub
+docker tag webpage:v1 mani970/dev:latest
+docker push mani970/dev:latest
 
-# Push the Docker image to the prod repository
-docker tag webpage:v1 mani970/prod:v1
-docker push mani970/prod:v1
+# Checkout the dev branch
+git checkout dev
+
+# Push the Docker image to the dev repository in Docker Hub
+docker tag webpage:v1 mani970/prod:latest
+docker push mani970/prod:latest
+
+# Checkout the master branch
+git checkout master
+
+# Push the Docker image to the prod repository in Docker Hub
+docker tag webpage:v1 mani970/prod:latest
+docker push mani970/prod:latest
