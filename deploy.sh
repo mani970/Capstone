@@ -11,6 +11,6 @@ elif [ "$BRANCH" == "master" ]; then
     docker tag webpage:v1 mani970/prod:v1
     docker push mani970/prod:v1
 else
-    echo "Invalid branch: $BRANCH"
+    echo "It is Invalid branch: $BRANCH"
     exit 1
 fi
