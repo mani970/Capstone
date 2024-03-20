@@ -1,9 +1,8 @@
 #!/bin/bash
 
-if [ "$1" == "dev" ]; then
-  echo "Pushing Docker image to dev repo in Docker Hub..."
-  docker-compose push
-elif [ "$1" == "prod" ]; then
-  echo "Pushing Docker image to prod repo in Docker Hub..."
-  docker-compose push
-fi
+# Log in to Docker Hub
+echo "${DOCKERHUB_TOKEN}" | docker login -u "${DOCKERHUB_USERNAME}" --password-stdin
+
+# Push the Docker image to Docker Hub
+docker tag webpage:v1 mani970/prod:v1
+docker push mani970/prod:v1
